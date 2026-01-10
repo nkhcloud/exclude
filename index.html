@@ -231,7 +231,7 @@
                         <button id="addExcludeBtn" class="btn-primary" style="padding:8px 12px;">Add</button>
                     </div>
                     <div id="excludeList" class="exclude-list"></div>
-                    <div style="margin-top:8px; font-size:12px; color:var(--text-muted);">Các label trong danh sách sẽ được tính vào mục Exclude khi nhấn <strong>Process</strong>.</div>
+                    <div style="margin-top:8px; font-size:12px; color:var(--text-muted);">Các label trong danh sách sẽ được tính vào mục Exclude khi nhấn <strong>Tính lại</strong>.</div>
                 </div>
             </div>
         </div>
@@ -254,7 +254,7 @@
                 <span class="result-value" id="totalBoxesRange">0</span>
             </div>
             <div class="result-item" id="rangeTotalAfterExcludeItem" style="display: none;">
-                <span class="result-label">Total box after excl:</span>
+                <span class="result-label">Total box after exclude:</span>
                 <span class="result-value" id="totalBoxesAfterExcludeRange">0</span>
             </div>
             <div class="result-item" id="rangeFramesWithSkipItem" style="display: none;">
@@ -676,6 +676,9 @@ iVBORw0KGgoAAAANSUhEUgAABMEAAAJpCAYAAACkSyW0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
                 const ids = currentXmlData.images.map(img => img.id).filter(x => !isNaN(x));
                 const minFrame = Math.min(...ids);
                 const maxFrame = Math.max(...ids);
+                // store min/max on current data for later validation
+                currentXmlData.minFrame = minFrame;
+                currentXmlData.maxFrame = maxFrame;
                 const startInput = document.getElementById('startFrame');
                 const endInput = document.getElementById('endFrame');
                 startInput.min = minFrame;
@@ -684,6 +687,9 @@ iVBORw0KGgoAAAANSUhEUgAABMEAAAJpCAYAAACkSyW0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
                 endInput.max = maxFrame;
                 startInput.value = minFrame;
                 endInput.value = maxFrame;
+
+                // Attach input validation listeners so user cannot leave values outside data bounds
+                attachFrameInputValidation();
                 
                 displayAllResults();
                 rangeInputs.classList.add('show');
@@ -721,8 +727,24 @@ iVBORw0KGgoAAAANSUhEUgAABMEAAAJpCAYAAACkSyW0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
                 showError('Vui lòng upload file trước khi tính khoảng frame');
                 return;
             }
-            const startFrame = parseInt(document.getElementById('startFrame').value) || 0;
-            const endFrame = parseInt(document.getElementById('endFrame').value) || 0;
+            const startFrameEl = document.getElementById('startFrame');
+            const endFrameEl = document.getElementById('endFrame');
+            const startFrame = parseInt(startFrameEl.value) || 0;
+            const endFrame = parseInt(endFrameEl.value) || 0;
+
+            // enforce bounds based on loaded data
+            const minFrame = (currentXmlData && currentXmlData.minFrame) ? currentXmlData.minFrame : null;
+            const maxFrame = (currentXmlData && currentXmlData.maxFrame) ? currentXmlData.maxFrame : null;
+            if (minFrame !== null && startFrame < minFrame) {
+                showError('Frame bắt đầu phải lớn hơn hoặc bằng ' + minFrame);
+                if (startFrameEl) startFrameEl.value = minFrame;
+                return;
+            }
+            if (maxFrame !== null && endFrame > maxFrame) {
+                showError('Frame kết thúc phải nhỏ hơn hoặc bằng ' + maxFrame);
+                if (endFrameEl) endFrameEl.value = maxFrame;
+                return;
+            }
             
             if (startFrame > endFrame) {
                 showError('Frame bắt đầu không được lớn hơn frame kết thúc');
@@ -809,6 +831,41 @@ iVBORw0KGgoAAAANSUhEUgAABMEAAAJpCAYAAACkSyW0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
             displayLabelDetails(labelTotals);
             
             errorDiv.classList.remove('show');
+        }
+
+        // Ensure start/end inputs respect the file's min/max frames on blur
+        function attachFrameInputValidation() {
+            try {
+                const s = document.getElementById('startFrame');
+                const e = document.getElementById('endFrame');
+                if (!s || !e || !currentXmlData) return;
+                const minF = currentXmlData.minFrame;
+                const maxF = currentXmlData.maxFrame;
+                s.addEventListener('blur', () => {
+                    const v = parseInt(s.value) || 0;
+                    if (v < minF) {
+                        showError('Start không được nhỏ hơn ' + minF);
+                        s.value = minF;
+                        setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
+                    } else if (v > maxF) {
+                        showError('Start không được lớn hơn ' + maxF);
+                        s.value = maxF;
+                        setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
+                    }
+                });
+                e.addEventListener('blur', () => {
+                    const v = parseInt(e.value) || 0;
+                    if (v < minF) {
+                        showError('End không được nhỏ hơn ' + minF);
+                        e.value = minF;
+                        setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
+                    } else if (v > maxF) {
+                        showError('End không được lớn hơn ' + maxF);
+                        e.value = maxF;
+                        setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
+                    }
+                });
+            } catch (e) { /* ignore */ }
         }
 
         function displayLabelDetails(labelTotals) {
