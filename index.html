@@ -198,7 +198,7 @@
         
         <div class="results" id="results">
             <div class="result-item" style="display: none;">
-                <span class="result-label">Tổng Frame:</span>
+                <span class="result-label">Total Frame:</span>
                 <span class="result-value" id="totalFrames">0</span>
             </div>
                 
@@ -207,11 +207,11 @@
                 <span class="result-value" id="excludeRange">0</span>
             </div>
             <div class="result-item" id="rangeTotalBoxesItem" style="display: none !important;">
-                <span class="result-label">Tổng box:</span>
+                <span class="result-label">Total box:</span>
                 <span class="result-value" id="totalBoxesRange">0</span>
             </div>
             <div class="result-item" id="rangeTotalAfterExcludeItem" style="display: none;">
-                <span class="result-label">Tổng box sau khi trừ exclude:</span>
+                <span class="result-label">Total box after excl:</span>
                 <span class="result-value" id="totalBoxesAfterExcludeRange">0</span>
             </div>
             <div class="result-item" id="rangeFramesWithSkipItem" style="display: none;">
@@ -292,11 +292,8 @@ iVBORw0KGgoAAAANSUhEUgAABMEAAAJpCAYAAACkSyW0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
 
     </div>
 </div>
-                <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e0e0e0; text-align:center; font-size:16px; color:#99;">
+                <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e0e0e0; text-align:center; font-size:16px; color:#999;">
                     Sau khi download, upload file vào công cụ này để bắt đầu đếm exclude boxes.
-                                <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e0e0e0; display:flex; justify-content:space-between; align-items:center;">
-                                    <!-- Single-page help: navigation removed per rollback request -->
-                                </div>
                 </div>
                 </div>
             </div>
@@ -803,16 +800,16 @@ iVBORw0KGgoAAAANSUhEUgAABMEAAAJpCAYAAACkSyW0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
                 `;
             });
 
-            // Always include the zero-box summary as a label-style item (count may be 0)
-            const noBoxHtml = `
+            // Only include the "Frame no box" row when there is at least 1 such frame
+            const noBoxHtml = (nb.length > 0) ? `
                 <div class="label-item" style="margin-top:12px;">
                     <span class="label-name">Frame no box</span>
                     <span class="label-count">${nb.length}</span>
                 </div>
-            `;
+            ` : '';
 
-            // If both labels and no-box are empty/zero, hide the details; otherwise show
-            const hasAny = html.trim() !== '' || nb.length > 0 || sortedLabels.length > 0;
+            // Show the details section only when there's at least one label with count>0 or non-zero no-box count
+            const hasAny = html.trim() !== '' || nb.length > 0;
             if (detailsSection) detailsSection.style.display = hasAny ? 'block' : 'none';
 
             detailsContent.innerHTML = html + noBoxHtml;
