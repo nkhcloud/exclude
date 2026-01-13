@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0014)about:internet -->
+<!-- saved from url=(0035)https://nkhcloud.github.io/exclude/ -->
 <html lang="vi"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -198,7 +198,7 @@
         </div>
         
         <div class="button-group">
-            <button class="btn-primary" onclick="document.getElementById('fileInput').click();">Chọn File</button>
+            <button class="btn-primary" onclick="document.getElementById(&#39;fileInput&#39;).click();">Chọn File</button>
             <button class="btn-secondary" id="clearBtn" onclick="resetForm();" style="display:none;">Xóa</button>
             <button class="btn-secondary" id="openHelpBtn">Hướng dẫn</button>
         </div>
@@ -731,23 +731,38 @@
             }
             const startFrameEl = document.getElementById('startFrame');
             const endFrameEl = document.getElementById('endFrame');
-            const startFrame = parseInt(startFrameEl.value) || 0;
-            const endFrame = parseInt(endFrameEl.value) || 0;
+            let startFrame = parseInt(startFrameEl.value) || 0;
+            let endFrame = parseInt(endFrameEl.value) || 0;
 
-            // enforce bounds based on loaded data
-            const minFrame = (currentXmlData && currentXmlData.minFrame) ? currentXmlData.minFrame : null;
-            const maxFrame = (currentXmlData && currentXmlData.maxFrame) ? currentXmlData.maxFrame : null;
-            if (minFrame !== null && startFrame < minFrame) {
-                showError('Frame bắt đầu phải lớn hơn hoặc bằng ' + minFrame);
-                if (startFrameEl) startFrameEl.value = minFrame;
-                return;
+            // clamp bounds based on loaded data (auto-correct on Process)
+            const minFrame = (currentXmlData && typeof currentXmlData.minFrame !== 'undefined') ? currentXmlData.minFrame : null;
+            const maxFrame = (currentXmlData && typeof currentXmlData.maxFrame !== 'undefined') ? currentXmlData.maxFrame : null;
+
+            // normalize/round
+            startFrame = Math.round(startFrame);
+            endFrame = Math.round(endFrame);
+
+            // perform clamping and reflect changes back to inputs (show a short message when clamped)
+            const originalStart = startFrame;
+            const originalEnd = endFrame;
+            if (minFrame !== null && maxFrame !== null) {
+                if (startFrame < minFrame) startFrame = minFrame;
+                if (startFrame > maxFrame) startFrame = maxFrame;
+                if (endFrame < minFrame) endFrame = minFrame;
+                if (endFrame > maxFrame) endFrame = maxFrame;
             }
-            if (maxFrame !== null && endFrame > maxFrame) {
-                showError('Frame kết thúc phải nhỏ hơn hoặc bằng ' + maxFrame);
-                if (endFrameEl) endFrameEl.value = maxFrame;
-                return;
+
+            if (startFrame !== originalStart) {
+                if (startFrameEl) startFrameEl.value = startFrame;
+                showError('Start được điều chỉnh về ' + startFrame);
+                setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
             }
-            
+            if (endFrame !== originalEnd) {
+                if (endFrameEl) endFrameEl.value = endFrame;
+                showError('End được điều chỉnh về ' + endFrame);
+                setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
+            }
+
             if (startFrame > endFrame) {
                 showError('Frame bắt đầu không được lớn hơn frame kết thúc');
                 return;
@@ -844,26 +859,28 @@
                 const minF = currentXmlData.minFrame;
                 const maxF = currentXmlData.maxFrame;
                 s.addEventListener('blur', () => {
-                    const v = parseInt(s.value) || 0;
-                    if (v < minF) {
-                        showError('Start không được nhỏ hơn ' + minF);
-                        s.value = minF;
+                    let v = Number(s.value);
+                    if (!Number.isFinite(v) || isNaN(v)) {
+                        showError('Start không hợp lệ');
                         setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
-                    } else if (v > maxF) {
-                        showError('Start không được lớn hơn ' + maxF);
-                        s.value = maxF;
+                        return;
+                    }
+                    v = Math.round(v);
+                    if (v < minF || v > maxF) {
+                        showError('Start phải trong khoảng ' + minF + ' - ' + maxF);
                         setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
                     }
                 });
                 e.addEventListener('blur', () => {
-                    const v = parseInt(e.value) || 0;
-                    if (v < minF) {
-                        showError('End không được nhỏ hơn ' + minF);
-                        e.value = minF;
+                    let v = Number(e.value);
+                    if (!Number.isFinite(v) || isNaN(v)) {
+                        showError('End không hợp lệ');
                         setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
-                    } else if (v > maxF) {
-                        showError('End không được lớn hơn ' + maxF);
-                        e.value = maxF;
+                        return;
+                    }
+                    v = Math.round(v);
+                    if (v < minF || v > maxF) {
+                        showError('End phải trong khoảng ' + minF + ' - ' + maxF);
                         setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
                     }
                 });
@@ -1002,3 +1019,4 @@
             } catch (e) {}
         }
     </script>
+</body></html>
