@@ -201,7 +201,7 @@
         </div>
         
         <div class="button-group">
-            <button class="btn-primary" onclick="document.getElementById('fileInput').click();">Chọn File</button>
+            <button class="btn-primary" onclick="document.getElementById(&#39;fileInput&#39;).click();">Chọn File</button>
             <button class="btn-secondary" id="clearBtn" onclick="resetForm();" style="display:none;">Xóa</button>
             <button class="btn-secondary" id="openHelpBtn">Hướng dẫn</button>
         </div>
@@ -275,11 +275,11 @@
 
             <!-- Missing attributes -->
             <div class="result-item" id="rangeBoxesMissingAttrItem" style="display: none;">
-                <span class="result-label">Boxes without attributes:</span>
+                <span class="result-label" style="display: none;">Boxes without attributes:</span>
                 <span class="result-value" id="boxesMissingAttrCount">0</span>
             </div>
             <div class="result-item" id="rangeFramesWithMissingAttrItem" style="display: none;">
-                <span class="result-label">Frames with boxes missing attributes:</span>
+                <span class="result-label" style="display: none;">Frames with boxes missing attributes:</span>
                 <span class="result-value" id="framesWithMissingAttrCount">0</span>
             </div>
 
@@ -1127,6 +1127,7 @@
                 return;
             }
 
+            let html = `<div class="detail-small" style="display: none;">Hiển thị danh sách box IDs và frame IDs (chỉ labels có schema attribute)</div>`;
             labels.forEach(lbl => {
                 const data = labelData[lbl];
                 const missingCount = data.missingBoxes.length;
@@ -1215,5 +1216,6 @@
             if (rowEl) rowEl.style.display = 'none';
         }
     </script>
-</body>
-</html>
+
+
+<deepl-input-controller translate="no"><template shadowrootmode="open"><link rel="stylesheet" href="chrome-extension://fancfknaplihpclbhbpclnmmjcjanbaf/build/content.css"><div dir="ltr" style="visibility: initial !important;"><div class="dl-input-translation-container svelte-95aucy"><div></div></div></div></template></deepl-input-controller></body></html>
