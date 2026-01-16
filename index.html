@@ -231,7 +231,7 @@
             </div>
             <div class="range-button-row" style="display:flex; gap:8px;">
                 <button class="btn-primary range-button" onclick="recalculateRange();">Process</button>
-                <button class="btn-secondary" id="findNoAttrBtn" onclick="findNoAttributeLabels();">Label chưa chọn thuộc tính</button>
+                <button class="btn-secondary" id="findNoAttrBtn" onclick="findNoAttributeLabels();">Unselected attribute</button>
             </div>
             <!-- Exclude Labels Manager -->
             <div style="margin-top:12px;">
@@ -271,16 +271,6 @@
             <div class="result-item" id="rangeFramesWithSkipItem" style="display: none;">
                 <span class="result-label">Frame_Skip (Pass):</span>
                 <span class="result-value" id="framesWithSkipRange">0</span>
-            </div>
-
-            <!-- Missing attributes -->
-            <div class="result-item" id="rangeBoxesMissingAttrItem" style="display: none;">
-                <span class="result-label">Boxes without attributes:</span>
-                <span class="result-value" id="boxesMissingAttrCount">0</span>
-            </div>
-            <div class="result-item" id="rangeFramesWithMissingAttrItem" style="display: none;">
-                <span class="result-label">Frames with boxes missing attributes:</span>
-                <span class="result-value" id="framesWithMissingAttrCount">0</span>
             </div>
 
             <!-- Over-selected (chọn thừa) -->
