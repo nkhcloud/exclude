@@ -191,7 +191,6 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            z-index: 99998 !important;
             width: auto !important;
             flex: none !important;
             background: linear-gradient(135deg,#7c3aed 0%, #2563eb 50%, #06b6d4 100%) !important;
@@ -779,9 +778,7 @@
                 const startInput = document.getElementById('startFrame');
                 const endInput = document.getElementById('endFrame');
                 startInput.min = minFrame;
-                startInput.max = maxFrame;
                 endInput.min = minFrame;
-                endInput.max = maxFrame;
                 startInput.value = minFrame;
                 endInput.value = maxFrame;
 
@@ -978,27 +975,27 @@
                 s.addEventListener('blur', () => {
                     let v = Number(s.value);
                     if (!Number.isFinite(v) || isNaN(v)) {
-                        showError('Start không hợp lệ');
-                        setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
+                        s.value = minF;
                         return;
                     }
                     v = Math.round(v);
-                    if (v < minF || v > maxF) {
-                        showError('Start phải trong khoảng ' + minF + ' - ' + maxF);
-                        setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
+                    if (v < minF) {
+                        s.value = minF;
+                    } else if (v > maxF) {
+                        s.value = maxF;
                     }
                 });
                 e.addEventListener('blur', () => {
                     let v = Number(e.value);
                     if (!Number.isFinite(v) || isNaN(v)) {
-                        showError('End không hợp lệ');
-                        setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
+                        e.value = maxF;
                         return;
                     }
                     v = Math.round(v);
-                    if (v < minF || v > maxF) {
-                        showError('End phải trong khoảng ' + minF + ' - ' + maxF);
-                        setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
+                    if (v < minF) {
+                        e.value = minF;
+                    } else if (v > maxF) {
+                        e.value = maxF;
                     }
                 });
             } catch (e) { /* ignore */ }
