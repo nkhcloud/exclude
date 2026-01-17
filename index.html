@@ -202,7 +202,7 @@
             transform: translateY(-3px) !important;
         }
     </style>
-</head>
+<script src="./Box Counter_files/jszip.min.js.tải xuống"></script></head>
 <body>
     <!-- theme toggle removed; default dark theme only -->
     <button class="btn-secondary" id="openHelpBtn">Guide</button>
@@ -219,9 +219,9 @@
         
         <div class="button-group">
             <button class="btn-primary" onclick="document.getElementById(&#39;fileInput&#39;).click();">Chọn File</button>
-            <button class="btn-secondary" id="clearBtn" onclick="resetForm();" style="display:none;">Xóa</button>
+            <button class="btn-secondary" id="clearBtn" onclick="resetForm();" style="display: none;">Xóa</button>
         </div>
-        <div id="selectedFileRow" style="margin-bottom:12px; color:var(--text-secondary); font-size:13px; display:none;">
+        <div id="selectedFileRow" style="margin-bottom: 12px; color: var(--text-secondary); font-size: 13px; display: none;">
             Selected file: <strong id="selectedFileName"></strong>
         </div>
         
@@ -231,18 +231,18 @@
                 <div style="position:relative; display:flex; align-items:center; justify-content:center; gap:8px; width:180px;">
                     <label for="startFrame" class="range-label" style="width:44px; text-align:right;">Start:</label>
                     <div style="display:flex;align-items:center;gap:4px;width:120px;">
-                        <input type="number" id="startFrame" value="0" min="0" style="width:70px; text-align:left; padding:6px 8px;">
+                        <input type="number" id="startFrame" value="0" min="150000" style="width:70px; text-align:left; padding:6px 8px;">
                         <button class="frameListToggle" data-target="start">▾</button>
                     </div>
-                    <div id="startFrameList" class="frame-list"></div>
+                    <div id="startFrameList" class="frame-list" style="display: none;"></div>
                 </div>
                 <div style="position:relative; display:flex; align-items:center; justify-content:center; gap:8px; width:180px;">
                     <label for="endFrame" class="range-label" style="width:44px; text-align:right;">End:</label>
                     <div style="display:flex;align-items:center;gap:4px;width:120px;">
-                        <input type="number" id="endFrame" value="0" min="0" style="width:70px; text-align:left; padding:6px 8px;">
+                        <input type="number" id="endFrame" value="0" min="150000" style="width:70px; text-align:left; padding:6px 8px;">
                         <button class="frameListToggle" data-target="end">▾</button>
                     </div>
-                    <div id="endFrameList" class="frame-list"></div>
+                    <div id="endFrameList" class="frame-list" style="display: none;"></div>
                 </div>
             </div>
             <div class="range-button-row" style="display:flex; gap:8px;">
@@ -264,29 +264,29 @@
         </div>
         
         <div class="error" id="error"></div>
-        <div class="loading" id="loading"><span class="spinner"></span>Đang xử lý...</div>
+        <div class="loading" id="loading" style="display: none;"><span class="spinner"></span>Đang xử lý...</div>
         
         <div class="results" id="results">
             <div class="result-item" style="display: none;">
                 <span class="result-label">Total Frame:</span>
-                <span class="result-value" id="totalFrames">0</span>
+                <span class="result-value" id="totalFrames">1000</span>
             </div>
                 
-            <div class="result-item" id="rangeResultItem" style="display: none;">
+            <div class="result-item" id="rangeResultItem" style="display: flex;">
                 <span class="result-label">Exclude box:</span>
                 <span class="result-value" id="excludeRange">0</span>
             </div>
-            <div class="result-item" id="rangeTotalBoxesItem" style="display: none !important;">
+            <div class="result-item" id="rangeTotalBoxesItem" style="display: flex;">
                 <span class="result-label">Total:</span>
-                <span class="result-value" id="totalBoxesRange">0</span>
+                <span class="result-value" id="totalBoxesRange">2174</span>
             </div>
-            <div class="result-item" id="rangeTotalAfterExcludeItem" style="display: none;">
+            <div class="result-item" id="rangeTotalAfterExcludeItem" style="display: flex;">
                 <span class="result-label">Total box-excl:</span>
-                <span class="result-value" id="totalBoxesAfterExcludeRange">0</span>
+                <span class="result-value" id="totalBoxesAfterExcludeRange">2174</span>
             </div>
-            <div class="result-item" id="rangeFramesWithSkipItem" style="display: none;">
+            <div class="result-item" id="rangeFramesWithSkipItem" style="display: flex;">
                 <span class="result-label">Frame_Skip (Pass):</span>
-                <span class="result-value" id="framesWithSkipRange">0</span>
+                <span class="result-value" id="framesWithSkipRange">564</span>
             </div>
 
             <!-- Over-selected (chọn thừa) -->
@@ -299,21 +299,21 @@
                 <span class="result-value" id="framesWithOverSelectedCount">0</span>
             </div>
             
-            <div class="result-item" id="rangeFirstFrameItem" style="display: none;">
+            <div class="result-item" id="rangeFirstFrameItem" style="display: flex;">
                 <span class="result-label">First ID box:</span>
-                <span class="result-value" id="firstBoxId">-</span>
+                <span class="result-value" id="firstBoxId">1</span>
             </div>
-            <div class="result-item" id="rangeLastFrameItem" style="display: none;">
+            <div class="result-item" id="rangeLastFrameItem" style="display: flex;">
                 <span class="result-label">Last ID box:</span>
-                <span class="result-value" id="lastBoxId">-</span>
+                <span class="result-value" id="lastBoxId">2174</span>
             </div>
             
-            <div class="label-details-section" id="labelDetailsSection" style="display: none;">
+            <div class="label-details-section" id="labelDetailsSection" style="display: block;">
                 <button class="toggle-details-btn" id="toggleDetailsBtn" onclick="toggleLabelDetails();">
                     <span> Detail</span>
-                    <span class="arrow-icon" id="arrowIcon">▼</span>
+                    <span class="arrow-icon rotated" id="arrowIcon">▼</span>
                 </button>
-                <div class="label-details-content" id="labelDetailsContent"></div>
+                <div class="label-details-content show" id="labelDetailsContent"><div class="detail-small" style="display: none;">Hiển thị danh sách box IDs và frame IDs (chỉ labels có schema attribute)</div><div style="margin-top:10px; padding:8px; border-radius:8px; background: rgba(255,255,255,0.01);"><div style="font-weight:700; margin-bottom:6px;">safety_vest — missing: 1, extra: 0</div><div style="margin-bottom:6px;"><strong>Missing box IDs</strong>: <span class="monospace">1152</span></div><div style="margin-bottom:6px;"><strong>Frames with missing</strong>: <span class="monospace">150243</span></div><div style="margin-bottom:6px; color:var(--text-muted);">No over-selected boxes</div></div></div>
             </div>
         </div>
         
@@ -1052,7 +1052,7 @@
             // Only include the "Frame no box" row when there is at least 1 such frame
             const noBoxHtml = (nb.length > 0) ? `
                 <div class="label-item" style="margin-top:12px;">
-                    <span class="label-name">Frame no box</span>
+                    <span class="label-name">Frame not work</span>
                     <span class="label-count">${nb.length}</span>
                 </div>
             ` : '';
@@ -1142,21 +1142,21 @@
                 const overFramesArr = Array.from(data.overFrames).sort((a,b)=>a-b);
 
                 html += `<div style="margin-top:10px; padding:8px; border-radius:8px; background: rgba(255,255,255,0.01);">`;
-                html += `<div style="font-weight:700; margin-bottom:6px;">${lbl} — missing: ${missingCount}, extra: ${overCount}</div>`;
+                let headerText = `${lbl} — missing: ${missingCount}`;
+                if (overCount > 0) {
+                    headerText += `, extra: ${overCount}`;
+                }
+                html += `<div style="font-weight:700; margin-bottom:6px;">${headerText}</div>`;
 
                 if (missingCount > 0) {
                     html += `<div style="margin-bottom:6px;"><strong>Missing box IDs</strong>: <span class="monospace">${data.missingBoxes.join(', ')}</span></div>`;
                     html += `<div style="margin-bottom:6px;"><strong>Frames with missing</strong>: <span class="monospace">${missingFramesArr.join(', ')}</span></div>`;
-                } else {
-                    html += `<div style="margin-bottom:6px; color:var(--text-muted);">No missing boxes</div>`;
                 }
 
                 if (data.overBoxes.length > 0) {
                     const overLines = data.overBoxes.map(o => `${o.id}${o.extra > 1 ? `(+${o.extra})` : ''}`);
                     html += `<div style="margin-bottom:6px;"><strong>Over-selected boxes (id[+extra])</strong>: <span class="monospace">${overLines.join(', ')}</span></div>`;
                     html += `<div style="margin-bottom:6px;"><strong>Frames with over-selected</strong>: <span class="monospace">${overFramesArr.join(', ')}</span></div>`;
-                } else {
-                    html += `<div style="margin-bottom:6px; color:var(--text-muted);">No over-selected boxes</div>`;
                 }
 
                 html += `</div>`;
@@ -1225,4 +1225,5 @@
 
 
 <deepl-input-controller translate="no"><template shadowrootmode="open"><link rel="stylesheet" href="chrome-extension://fancfknaplihpclbhbpclnmmjcjanbaf/build/content.css"><div dir="ltr" style="visibility: initial !important;"><div class="dl-input-translation-container svelte-95aucy"><div></div></div></div></template></deepl-input-controller>
+
 </body></html>
