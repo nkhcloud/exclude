@@ -778,7 +778,9 @@
                 const startInput = document.getElementById('startFrame');
                 const endInput = document.getElementById('endFrame');
                 startInput.min = minFrame;
+                startInput.max = maxFrame;
                 endInput.min = minFrame;
+                endInput.max = maxFrame;
                 startInput.value = minFrame;
                 endInput.value = maxFrame;
 
@@ -834,24 +836,16 @@
             startFrame = Math.round(startFrame);
             endFrame = Math.round(endFrame);
 
-            const originalStart = startFrame;
-            const originalEnd = endFrame;
+            // Validate range without auto-adjusting (validation happens on input event already)
             if (minFrame !== null && maxFrame !== null) {
-                if (startFrame < minFrame) startFrame = minFrame;
-                if (startFrame > maxFrame) startFrame = maxFrame;
-                if (endFrame < minFrame) endFrame = minFrame;
-                if (endFrame > maxFrame) endFrame = maxFrame;
-            }
-
-            if (startFrame !== originalStart) {
-                if (startFrameEl) startFrameEl.value = startFrame;
-                showError('Start được điều chỉnh về ' + startFrame);
-                setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
-            }
-            if (endFrame !== originalEnd) {
-                if (endFrameEl) endFrameEl.value = endFrame;
-                showError('End được điều chỉnh về ' + endFrame);
-                setTimeout(() => { document.getElementById('error').classList.remove('show'); }, 1800);
+                if (startFrame < minFrame || startFrame > maxFrame) {
+                    showError('Start phải trong khoảng ' + minFrame + ' - ' + maxFrame);
+                    return;
+                }
+                if (endFrame < minFrame || endFrame > maxFrame) {
+                    showError('End phải trong khoảng ' + minFrame + ' - ' + maxFrame);
+                    return;
+                }
             }
 
             if (startFrame > endFrame) {
@@ -972,32 +966,52 @@
                 if (!s || !e || !currentXmlData) return;
                 const minF = currentXmlData.minFrame;
                 const maxF = currentXmlData.maxFrame;
-                s.addEventListener('blur', () => {
+                
+                const validateStartFrame = () => {
+                    // On blur, validate and set default if empty
+                    if (s.value === '' || s.value === null) {
+                        s.value = minF;
+                        return;
+                    }
+                    
                     let v = Number(s.value);
                     if (!Number.isFinite(v) || isNaN(v)) {
                         s.value = minF;
                         return;
                     }
+                    
                     v = Math.round(v);
                     if (v < minF) {
                         s.value = minF;
                     } else if (v > maxF) {
                         s.value = maxF;
                     }
-                });
-                e.addEventListener('blur', () => {
+                };
+                
+                const validateEndFrame = () => {
+                    // On blur, validate and set default if empty
+                    if (e.value === '' || e.value === null) {
+                        e.value = maxF;
+                        return;
+                    }
+                    
                     let v = Number(e.value);
                     if (!Number.isFinite(v) || isNaN(v)) {
                         e.value = maxF;
                         return;
                     }
+                    
                     v = Math.round(v);
                     if (v < minF) {
                         e.value = minF;
                     } else if (v > maxF) {
                         e.value = maxF;
                     }
-                });
+                };
+                
+                // Validate only on blur - allows user to freely type and delete
+                s.addEventListener('blur', validateStartFrame);
+                e.addEventListener('blur', validateEndFrame);
             } catch (e) { /* ignore */ }
         }
 
