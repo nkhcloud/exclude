@@ -172,7 +172,7 @@
         .exclude-list { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
         .exclude-chip { background:var(--chip-bg); color:var(--chip-text); padding:6px 10px; border-radius:999px; display:inline-flex; align-items:center; gap:8px; font-weight:700; }
         .exclude-chip button{ background:transparent; border:0; color:var(--chip-text); cursor:pointer; }
-        .modal-content { background: var(--modal-bg); border-radius:16px; border:1px solid var(--modal-border); max-width: 90vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+        .modal-content { background: var(--modal-bg); border-radius:16px; border:1px solid var(--modal-border); width: 100%; height: 100%; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
         .modal-overlay { display:none; position:fixed; left:0; top:0; right:0; bottom:0; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:99999 !important; }
         .modal-header { position:sticky; top:0; z-index:11; display:flex; justify-content:space-between; align-items:center; padding:8px 12px 4px 12px; margin:0; border-bottom:1px solid var(--modal-border); background:transparent; }
         .modal-close { background:var(--chip-bg); border:1px solid var(--panel-border); padding:5px 8px; border-radius:4px; cursor:pointer; font-size:18px; line-height:1; color:var(--text-primary); }
@@ -191,7 +191,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            z-index: 10000 !important;
+            z-index: 99998 !important;
             width: auto !important;
             flex: none !important;
             background: linear-gradient(135deg,#7c3aed 0%, #2563eb 50%, #06b6d4 100%) !important;
@@ -395,11 +395,13 @@
         function openHelpModal() {
             if (!helpModal) return;
             helpModal.style.display = 'flex';
+            openHelpBtn.style.display = 'none';
         }
 
         function closeHelpModal() {
             if (!helpModal) return;
             helpModal.style.display = 'none';
+            openHelpBtn.style.display = 'block';
         }
 
         if (openHelpBtn) openHelpBtn.addEventListener('click', (e) => { e.preventDefault(); openHelpModal(); });
