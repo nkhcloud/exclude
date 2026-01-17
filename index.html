@@ -968,17 +968,11 @@
                 const maxF = currentXmlData.maxFrame;
                 
                 const validateStartFrame = () => {
-                    // On blur, validate and set default if empty
-                    if (s.value === '' || s.value === null) {
-                        s.value = minF;
-                        return;
-                    }
+                    // Only validate on blur, not on input
+                    if (s.value === '' || s.value === null) return; // Allow empty
                     
                     let v = Number(s.value);
-                    if (!Number.isFinite(v) || isNaN(v)) {
-                        s.value = minF;
-                        return;
-                    }
+                    if (!Number.isFinite(v) || isNaN(v)) return; // Invalid = skip
                     
                     v = Math.round(v);
                     if (v < minF) {
@@ -989,17 +983,11 @@
                 };
                 
                 const validateEndFrame = () => {
-                    // On blur, validate and set default if empty
-                    if (e.value === '' || e.value === null) {
-                        e.value = maxF;
-                        return;
-                    }
+                    // Only validate on blur, not on input
+                    if (e.value === '' || e.value === null) return; // Allow empty
                     
                     let v = Number(e.value);
-                    if (!Number.isFinite(v) || isNaN(v)) {
-                        e.value = maxF;
-                        return;
-                    }
+                    if (!Number.isFinite(v) || isNaN(v)) return; // Invalid = skip
                     
                     v = Math.round(v);
                     if (v < minF) {
@@ -1009,7 +997,7 @@
                     }
                 };
                 
-                // Validate only on blur - allows user to freely type and delete
+                // Validate ONLY on blur - user can type and delete freely
                 s.addEventListener('blur', validateStartFrame);
                 e.addEventListener('blur', validateEndFrame);
             } catch (e) { /* ignore */ }
