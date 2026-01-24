@@ -218,7 +218,7 @@
         </div>
         
         <div class="button-group">
-            <button class="btn-primary" onclick="document.getElementById(&#39;fileInput&#39;).click();">Chọn File</button>
+            <button class="btn-primary" onclick="document.getElementById('fileInput').click();">Chọn File</button>
             <button class="btn-secondary" id="clearBtn" onclick="resetForm();" style="display: none;">Xóa</button>
         </div>
         <div id="selectedFileRow" style="margin-bottom: 12px; color: var(--text-secondary); font-size: 13px; display: none;">
@@ -311,9 +311,9 @@
             <div class="label-details-section" id="labelDetailsSection" style="display: block;">
                 <button class="toggle-details-btn" id="toggleDetailsBtn" onclick="toggleLabelDetails();">
                     <span> Detail</span>
-                    <span class="arrow-icon rotated" id="arrowIcon">▼</span>
+                    <span class="arrow-icon" id="arrowIcon">▼</span>
                 </button>
-                <div class="label-details-content show" id="labelDetailsContent"><div class="detail-small" style="display: none;">Hiển thị danh sách box IDs và frame IDs (chỉ labels có schema attribute)</div><div style="margin-top:10px; padding:8px; border-radius:8px; background: rgba(255,255,255,0.01);"><div style="font-weight:700; margin-bottom:6px;">safety_vest — missing: 1, extra: 0</div><div style="margin-bottom:6px;"><strong>Missing box IDs</strong>: <span class="monospace">1152</span></div><div style="margin-bottom:6px;"><strong>Frames with missing</strong>: <span class="monospace">150243</span></div><div style="margin-bottom:6px; color:var(--text-muted);">No over-selected boxes</div></div></div>
+                <div class="label-details-content" id="labelDetailsContent"></div>
             </div>
         </div>
         
@@ -1131,6 +1131,7 @@
             if (labels.length === 0) {
                 detailsSection.style.display = 'block';
                 detailsContent.innerHTML = '<div style="padding:8px; color:var(--text-muted);">Không tìm thấy label nào thiếu thuộc tính hoặc chọn thừa (chỉ kiểm tra labels có thuộc tính) trong khoảng đã chọn.</div>';
+                // Tự động mở detail section
                 if (!labelDetailsVisible) toggleLabelDetails();
                 return;
             }
@@ -1166,6 +1167,7 @@
 
             detailsSection.style.display = 'block';
             detailsContent.innerHTML = html;
+            // Tự động mở detail section khi tìm thấy unselected attribute
             if (!labelDetailsVisible) toggleLabelDetails();
         }
 
@@ -1229,11 +1231,12 @@
 <deepl-input-controller translate="no"><template shadowrootmode="open"><link rel="stylesheet" href="chrome-extension://fancfknaplihpclbhbpclnmmjcjanbaf/build/content.css"><div dir="ltr" style="visibility: initial !important;"><div class="dl-input-translation-container svelte-95aucy"><div></div></div></div></template></deepl-input-controller>
 
 <!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-805GHPRGCP"></script>
+<script async="" src="./test_files/js"></script>
 <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-805GHPRGCP');
 </script>
+
 </body></html>
