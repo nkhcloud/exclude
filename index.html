@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0035)https://nkhcloud.github.io/exclude/ -->
 <html lang="vi"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -202,7 +201,7 @@
             transform: translateY(-3px) !important;
         }
     </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script></head>
+<script src="./backup new_files/jszip.min.js.tải xuống"></script></head>
 <body>
     <!-- theme toggle removed; default dark theme only -->
     <button class="btn-secondary" id="openHelpBtn">Guide</button>
@@ -247,11 +246,10 @@
             </div>
             <div class="range-button-row" style="display:flex; gap:8px;">
                 <button class="btn-primary range-button" onclick="recalculateRange();">Process</button>
-                <button class="btn-primary range-button" id="findNoAttrBtn" onclick="findNoAttributeLabels();">Unselected attribute</button>
+                <button id="toggleExcludeBtn" class="btn-primary range-button" style="padding:8px 12px;">🔒 Exclude labels</button>
             </div>
             <!-- Exclude Labels Manager -->
             <div style="margin-top:12px;">
-                <button id="toggleExcludeBtn" class="btn-secondary" style="width:100%; display:flex; justify-content:center; gap:8px;">🔒Exclude labels</button>
                 <div id="excludeControls" class="panel" style="display:none; margin-top:10px;">
                     <div class="exclude-row">
                         <input id="excludeLabelInput" class="exclude-input" type="text" placeholder="Nhập label để exclude (ví dụ: _corrupt)">
@@ -313,7 +311,10 @@
                     <span> Detail</span>
                     <span class="arrow-icon" id="arrowIcon">▼</span>
                 </button>
-                <div class="label-details-content" id="labelDetailsContent"></div>
+                <div class="label-details-content" id="labelDetailsContent">
+                    <div id="labelSummaryContent"></div>
+                    <div id="unselectedAttrDetailContent" style="display:none;"></div>
+                </div>
             </div>
         </div>
         
@@ -793,6 +794,7 @@
 
                 try {
                     recalculateRange();
+                    try { updateMissingAttributesVisibility(); } catch (e) {}
                 } catch (e) { /* swallow */ }
                 
             } catch (error) {
@@ -956,6 +958,9 @@
             // Hiển thị chi tiết label, include missing & over-selected counts per label (labels with no schema are skipped)
             displayLabelDetails(labelTotals);
             
+            // Tự động kiểm tra missing/over và hiển thị  chi tiết nếu có, hoặc ẩn nếu không
+            try { updateMissingAttributesVisibility(); } catch (e) {}
+            
             errorDiv.classList.remove('show');
         }
 
@@ -1063,7 +1068,11 @@
             const hasAny = html.trim() !== '' || nb.length > 0;
             if (detailsSection) detailsSection.style.display = hasAny ? 'block' : 'none';
 
-            detailsContent.innerHTML = html + noBoxHtml;
+            // Put summary into its own container; keep unselected-detail hidden by default
+            const summaryEl = document.getElementById('labelSummaryContent');
+            if (summaryEl) summaryEl.innerHTML = html + noBoxHtml;
+            const unselectedEl = document.getElementById('unselectedAttrDetailContent');
+            if (unselectedEl) { unselectedEl.style.display = 'none'; }
         }
 
         function toggleLabelDetails() {
@@ -1085,90 +1094,21 @@
         // and also report labels that have extra selections (select > 1). Skip labels without schema.
         // This function now generates detailed lists of box IDs and frame IDs.
         function findNoAttributeLabels() {
+            // Unused UI now; keep it safe: update counts and ensure verbose unselected detail stays hidden.
             if (!currentXmlData) {
                 showError('Vui lòng upload file trước');
                 return;
             }
-            // Ensure the range is current
+            // Ensure the range is current and counts are up to date
             recalculateRange();
+            const unselectedEl = document.getElementById('unselectedAttrDetailContent');
+            if (unselectedEl) { unselectedEl.style.display = 'none'; unselectedEl.innerHTML = ''; }
+        }
 
-            const labelHasAttrs = currentXmlData.labelHasAttributes || {};
-
-            // Build mapping label -> { missing: [], over: [{id,extra}], framesMissing:Set, framesOver:Set }
-            const labelData = {}; // label -> { missingBoxes: [], missingFrames:Set, overBoxes: [{id,extra}], overFrames:Set }
-
-            (lastFilteredImages || []).forEach(img => {
-                const frameId = img.id;
-                const labels = img.boxLabels || [];
-                (labels || []).forEach((lbl, idx) => {
-                    if (!lbl) return;
-                    if (!labelHasAttrs[lbl]) return; // skip labels without attribute schema entirely
-                    const selCount = (img.boxSelectedCounts && img.boxSelectedCounts[idx]) ? img.boxSelectedCounts[idx] : 0;
-                    if (!labelData[lbl]) labelData[lbl] = { missingBoxes: [], missingFrames: new Set(), overBoxes: [], overFrames: new Set() };
-                    if (selCount === 0) {
-                        // find box id corresponding to this index
-                        const bid = (img.boxIds && img.boxIds[idx]) ? img.boxIds[idx] : null;
-                        if (bid !== null && !isNaN(bid)) {
-                            labelData[lbl].missingBoxes.push(bid);
-                            labelData[lbl].missingFrames.add(frameId);
-                        }
-                    } else if (selCount > 1) {
-                        const extra = selCount - 1;
-                        const bid = (img.boxIds && img.boxIds[idx]) ? img.boxIds[idx] : null;
-                        if (bid !== null && !isNaN(bid)) {
-                            labelData[lbl].overBoxes.push({ id: bid, extra: extra });
-                            labelData[lbl].overFrames.add(frameId);
-                        }
-                    }
-                });
-            });
-
-            // Build detail HTML
-            const detailsContent = document.getElementById('labelDetailsContent');
-            const detailsSection = document.getElementById('labelDetailsSection');
-
-            const labels = Object.keys(labelData).sort();
-            if (labels.length === 0) {
-                detailsSection.style.display = 'block';
-                detailsContent.innerHTML = '<div style="padding:8px; color:var(--text-muted);">Không tìm thấy label nào thiếu thuộc tính hoặc chọn thừa (chỉ kiểm tra labels có thuộc tính) trong khoảng đã chọn.</div>';
-                // Tự động mở detail section
-                if (!labelDetailsVisible) toggleLabelDetails();
-                return;
-            }
-
-            let html = `<div class="detail-small" style="display: none;">Hiển thị danh sách box IDs và frame IDs (chỉ labels có schema attribute)</div>`;
-            labels.forEach(lbl => {
-                const data = labelData[lbl];
-                const missingCount = data.missingBoxes.length;
-                const overCount = data.overBoxes.reduce((s, e) => s + e.extra, 0);
-                const missingFramesArr = Array.from(data.missingFrames).sort((a,b)=>a-b);
-                const overFramesArr = Array.from(data.overFrames).sort((a,b)=>a-b);
-
-                html += `<div style="margin-top:10px; padding:8px; border-radius:8px; background: rgba(255,255,255,0.01);">`;
-                let headerText = `${lbl} — missing: ${missingCount}`;
-                if (overCount > 0) {
-                    headerText += `, extra: ${overCount}`;
-                }
-                html += `<div style="font-weight:700; margin-bottom:6px;">${headerText}</div>`;
-
-                if (missingCount > 0) {
-                    html += `<div style="margin-bottom:6px;"><strong>Missing box IDs</strong>: <span class="monospace">${data.missingBoxes.join(', ')}</span></div>`;
-                    html += `<div style="margin-bottom:6px;"><strong>Frames with missing</strong>: <span class="monospace">${missingFramesArr.join(', ')}</span></div>`;
-                }
-
-                if (data.overBoxes.length > 0) {
-                    const overLines = data.overBoxes.map(o => `${o.id}${o.extra > 1 ? `(+${o.extra})` : ''}`);
-                    html += `<div style="margin-bottom:6px;"><strong>Over-selected boxes (id[+extra])</strong>: <span class="monospace">${overLines.join(', ')}</span></div>`;
-                    html += `<div style="margin-bottom:6px;"><strong>Frames with over-selected</strong>: <span class="monospace">${overFramesArr.join(', ')}</span></div>`;
-                }
-
-                html += `</div>`;
-            });
-
-            detailsSection.style.display = 'block';
-            detailsContent.innerHTML = html;
-            // Tự động mở detail section khi tìm thấy unselected attribute
-            if (!labelDetailsVisible) toggleLabelDetails();
+        function updateMissingAttributesVisibility() {
+            // We only want to keep the summary counts visible; hide the verbose unselected-detail lists.
+            const unselectedEl = document.getElementById('unselectedAttrDetailContent');
+            if (unselectedEl) { unselectedEl.style.display = 'none'; unselectedEl.innerHTML = ''; }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1228,12 +1168,11 @@
     </script>
 
 <!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-805GHPRGCP"></script>
+<script async="" src="./backup new_files/js"></script>
 <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-805GHPRGCP');
 </script>
-
-
+</html>
