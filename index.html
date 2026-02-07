@@ -896,7 +896,15 @@
                 });
                 return sum + s;
             }, 0);
-            const combinedExcludeCount = excludeCount + extraExcludeCount;
+            // Count boxes that belong to frames marked as 'skip' (either via skip label or selected 'pass')
+            const skipFrameBoxesCount = filteredImages.reduce((sum, img) => {
+                // If image/frame hasPass, exclude all boxes in that frame
+                if (img.hasPass) return sum + (img.totalBoxes || 0);
+                // Otherwise only exclude boxes explicitly labeled as 'skip'
+                return sum + (img.frameSkipBoxCount || 0);
+            }, 0);
+
+            const combinedExcludeCount = excludeCount + extraExcludeCount + skipFrameBoxesCount;
             const totalBoxesCount = filteredImages.reduce((sum, img) => sum + img.totalBoxes, 0);
             const totalBoxesAfterExcludeRange = Math.max(0, totalBoxesCount - combinedExcludeCount);
             
