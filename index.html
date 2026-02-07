@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- saved from url=(0035)https://nkhcloud.github.io/exclude/ -->
 <html lang="vi"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -201,7 +202,7 @@
             transform: translateY(-3px) !important;
         }
     </style>
-<script src="./backup new_files/jszip.min.js.tải xuống"></script></head>
+<script src="./Box Counter_files/jszip.min.js.tải xuống"></script></head>
 <body>
     <!-- theme toggle removed; default dark theme only -->
     <button class="btn-secondary" id="openHelpBtn">Guide</button>
@@ -649,15 +650,28 @@
                 const images = xmlDoc.getElementsByTagName('image');
 
                 // Build a map of label definitions -> whether they have attributes defined in the schema
+                // Also build a map to store attribute names for each label
                 const labelDefs = Array.from(xmlDoc.getElementsByTagName('label'));
                 const labelHasAttributes = {};
+                const labelAttrNames = {}; // {labelName: [attrName1, attrName2, ...]}
                 labelDefs.forEach(ld => {
                     let name = '';
                     const nameEl = ld.getElementsByTagName('name')[0];
                     if (nameEl) name = String(nameEl.textContent || '').trim();
                     if (!name) name = ld.getAttribute('name') || '';
-                    const attrEls = ld.getElementsByTagName('attribute');
-                    labelHasAttributes[name] = attrEls && attrEls.length > 0;
+                    const attrElsCollection = ld.getElementsByTagName('attribute');
+                    const attrEls = Array.from(attrElsCollection || []);
+                    labelHasAttributes[name] = attrEls.length > 0;
+                    // Extract attribute names for this label
+                    const attrNames = [];
+                    attrEls.forEach(ae => {
+                        let aName = '';
+                        const aNameEl = ae.getElementsByTagName('name')[0];
+                        if (aNameEl) aName = String(aNameEl.textContent || '').trim();
+                        if (!aName) aName = ae.getAttribute('name') || '';
+                        if (aName) attrNames.push(aName);
+                    });
+                    labelAttrNames[name] = attrNames;
                 });
 
                 // Assign sequential box IDs if missing
@@ -739,6 +753,7 @@
 
                         // frameSkipBoxCount etc
                         let frameSkipBoxCount = 0;
+                        let hasPass = false;
                         if (boxes.length === 0) {
                             // frame with no boxes
                         }
@@ -747,6 +762,15 @@
                             if (!raw) return;
                             if (raw.toLowerCase().includes('skip')) {
                                 frameSkipBoxCount++;
+                            }
+                            // Check if this box has attribute 'pass' = true
+                            const attrNames = labelAttrNames[raw] || [];
+                            const passIdx = attrNames.findIndex(n => String(n || '').trim().toLowerCase() === 'pass');
+                            if (passIdx >= 0 && boxAttributesArray[idx]) {
+                                const passValue = boxAttributesArray[idx][passIdx];
+                                if (passValue && isAttrSelected(passValue)) {
+                                    hasPass = true;
+                                }
                             }
                         });
 
@@ -760,6 +784,7 @@
                             exclBoxes: boxLabels.filter(l => String(l).toLowerCase() === '_excl_area').length,
                             frameSkipBoxCount: frameSkipBoxCount,
                             frameNoBox: boxes.length === 0 ? 1 : 0,
+                            hasPass: hasPass,
                             boxAttributesArray: boxAttributesArray,
                             boxSelectedCounts: boxSelectedCounts,
                             boxHasAttributes: boxHasAttributes,
@@ -888,7 +913,7 @@
             const framesNoBoxCount = noBoxFrames.length;
             const framesWithSkipCount = filteredImages.reduce((sum, img) => {
                 const labels = img.boxLabels || [];
-                const hasSkip = (img.totalBoxes === 0) || labels.some(l => l && String(l).toLowerCase().includes('skip'));
+                const hasSkip = (img.totalBoxes === 0) || labels.some(l => l && String(l).toLowerCase().includes('skip')) || img.hasPass;
                 return sum + (hasSkip ? 1 : 0);
             }, 0);
 
@@ -941,16 +966,16 @@
             const framesWithMissingAttrItem = document.getElementById('rangeFramesWithMissingAttrItem');
             if (framesWithMissingAttrItem) framesWithMissingAttrItem.style.display = framesWithMissingAttrCount > 0 ? 'flex' : 'none';
 
-            // update result items for over-selected
+            // update result items for over-selected (hidden from main results, only shown in details per label)
             const boxesOverSelectedEl = document.getElementById('boxesOverSelectedCount');
             if (boxesOverSelectedEl) boxesOverSelectedEl.textContent = boxesOverSelectedCount;
             const boxesOverSelectedItem = document.getElementById('rangeBoxesOverSelectedItem');
-            if (boxesOverSelectedItem) boxesOverSelectedItem.style.display = boxesOverSelectedCount > 0 ? 'flex' : 'none';
+            if (boxesOverSelectedItem) boxesOverSelectedItem.style.display = 'none';
 
             const framesWithOverSelectedEl = document.getElementById('framesWithOverSelectedCount');
             if (framesWithOverSelectedEl) framesWithOverSelectedEl.textContent = framesWithOverSelectedCount;
             const framesWithOverSelectedItem = document.getElementById('rangeFramesWithOverSelectedItem');
-            if (framesWithOverSelectedItem) framesWithOverSelectedItem.style.display = framesWithOverSelectedCount > 0 ? 'flex' : 'none';
+            if (framesWithOverSelectedItem) framesWithOverSelectedItem.style.display = 'none';
 
             // Save filteredImages for details rendering
             lastFilteredImages = filteredImages;
@@ -969,42 +994,8 @@
                 const s = document.getElementById('startFrame');
                 const e = document.getElementById('endFrame');
                 if (!s || !e || !currentXmlData) return;
-                const minF = currentXmlData.minFrame;
-                const maxF = currentXmlData.maxFrame;
-                
-                const validateStartFrame = () => {
-                    // Only validate on blur, not on input
-                    if (s.value === '' || s.value === null) return; // Allow empty
-                    
-                    let v = Number(s.value);
-                    if (!Number.isFinite(v) || isNaN(v)) return; // Invalid = skip
-                    
-                    v = Math.round(v);
-                    if (v < minF) {
-                        s.value = minF;
-                    } else if (v > maxF) {
-                        s.value = maxF;
-                    }
-                };
-                
-                const validateEndFrame = () => {
-                    // Only validate on blur, not on input
-                    if (e.value === '' || e.value === null) return; // Allow empty
-                    
-                    let v = Number(e.value);
-                    if (!Number.isFinite(v) || isNaN(v)) return; // Invalid = skip
-                    
-                    v = Math.round(v);
-                    if (v < minF) {
-                        e.value = minF;
-                    } else if (v > maxF) {
-                        e.value = maxF;
-                    }
-                };
-                
-                // Validate ONLY on blur - user can type and delete freely
-                s.addEventListener('blur', validateStartFrame);
-                e.addEventListener('blur', validateEndFrame);
+                // No automatic validation on blur - user has full control
+                // Validation happens only when Process button is clicked
             } catch (e) { /* ignore */ }
         }
 
@@ -1168,11 +1159,12 @@
     </script>
 
 <!-- Google Analytics -->
-<script async="" src="./backup new_files/js"></script>
+<script async="" src="./Box Counter_files/js"></script>
 <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-805GHPRGCP');
 </script>
-</html>
+
+</body></html>
